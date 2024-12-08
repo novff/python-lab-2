@@ -37,12 +37,14 @@ class user:
             self.password = new_password
         else:
             print("неправильный старый пароль.")
-    def list_items(self):
+    def list_items(self, sort_key='name'):
         self.action_history.append({"list_items": datetime.now()})
-        table = [["наименование","количество","цена"]]
-        for i in items:
+        header = ["наименование","количество","цена"]
+        table = []
+        sorted_items = sorted(items, key=lambda x: getattr(x, f'get_{sort_key}')())
+        for i in sorted_items:
             table.append([i.get_name(), i.get_quantity(), i.get_price()])
-        print(tabulate(table))
+        print(tabulate(table, headers=header))
     def take_item(self, n):
         self.action_history.append({"take_item " + n: datetime.now()})
         for i in items:
@@ -92,11 +94,12 @@ class admin:
                 i.set_quantity(new_quantity)
                 i.set_price(new_price)
                 return        
-    def list_items(self):
+    def list_items(self, sort_key='name'):
         self.action_history.append({"list_items": datetime.now()})
         header = ["наименование","количество","цена"]
         table = []
-        for i in items:
+        sorted_items = sorted(items, key=lambda x: getattr(x, f'get_{sort_key}')())
+        for i in sorted_items:
             table.append([i.get_name(), i.get_quantity(), i.get_price()])
         print(tabulate(table, headers=header))
         
@@ -150,7 +153,9 @@ def adminPanel(u):
                         print(tabulate([u.action_history]))
                         break
             case 5:
-                u.list_items()
+                sort_option = int(input("выберите способ сортировки:\n1)по наименованию\n2)по количеству\n3)по цене\n"))
+                sort_key = 'name' if sort_option == 1 else 'quantity' if sort_option == 2 else 'price'
+                u.list_items(sort_key)
             case 6:
                 a = int(input("выберите тип учетной записи:\n1)пользователь\n2)админ"))
                 if a == 1 or a == 2:
@@ -185,7 +190,9 @@ def userPanel(u):
                 b = input("введите новый пароль:")
                 u.change_password(a, b)
             case 2:
-                u.list_items()
+                sort_option = int(input("выберите способ сортировки:\n1)по наименованию\n2)по количеству\n3)по цене\n"))
+                sort_key = 'name' if sort_option == 1 else 'quantity' if sort_option == 2 else 'price'
+                u.list_items(sort_key)
             case 3:
                 u.list_analytics()
             case 4:
